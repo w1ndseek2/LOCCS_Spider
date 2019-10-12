@@ -1,5 +1,5 @@
 from redis import StrictRedis
-from data.config import REDIS_HOST, REDIS_PASS, REDIS_PORT
+from config import REDIS_HOST, REDIS_PASS, REDIS_PORT, SPIDER_NAME
 import os
 #manage redis
 

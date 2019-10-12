@@ -10,13 +10,13 @@ import multiprocessing as mp
 import logging
 import coloredlogs
 import traceback
-from data.config import SPIDER_PROCESS_NUM, SPIDER_NAME
+from config import SPIDER_PROCESS_NUM, SPIDER_NAME
 
 
 log = logging.getLogger(__name__)
 coloredlogs.install(
     logger=log,
-    level="INFO",
+    level="NONE",
     fmt="[%(levelname)s] %(message)s"
 )
 
