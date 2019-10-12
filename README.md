@@ -15,6 +15,8 @@ config.py 配置文件 redis密码 logstash端口等
 randomHP.py 随机header 代理池  
 myRedis.py Redis 增，删，状态读取
 
+`实际运行的时候只需要将spider.py里level="DEBUG"设置成level="NONE"即可`
+
 ## Development
 
 安装依赖 `pip3 install coloredlogs pyredis`  

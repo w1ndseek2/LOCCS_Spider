@@ -16,7 +16,7 @@ from config import SPIDER_PROCESS_NUM, SPIDER_NAME
 log = logging.getLogger(__name__)
 coloredlogs.install(
     logger=log,
-    level="NONE",
+    level="DEBUG",
     fmt="[%(levelname)s] %(message)s"
 )
 
