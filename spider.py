@@ -12,7 +12,6 @@ import coloredlogs
 import traceback
 from config import SPIDER_PROCESS_NUM, SPIDER_NAME
 
-
 log = logging.getLogger(__name__)
 coloredlogs.install(
     logger=log,
@@ -38,7 +37,7 @@ class Spider:
                 url, headers=random_header(),
                 timeout=5, proxies={}
             )
-            
+
             #del from todo
             try:
                 redis_manager.del_todo(url)
@@ -105,9 +104,18 @@ class Spider:
         _url = domain_split[split_len-2] + '.' + domain_split[split_len-1]
         return _url
 
+    def extension_check(self, url):
+        extension = url.split('.')[-1]
+        black_extension_list = ['pdf', 'mp4', 'mp3', 'js', 'css', 'txt', 'jpg', 'svg', 'png', 'gif',
+                                'zip', 'bmp', 'swf', 'rar', '7z', 'mov', 'avi', 'iso', 'exe', 'pptx', 'xlsx', 'doc']
+        if extension not in black_extension_list:
+            return True
+        else:
+            return False
+
     def crawl_more_urls(self, father_url, content):
 
-        log.info("[+]now crawing " + father_url + " for more urls")
+        log.info("[+] now crawing " + father_url + " for more urls")
         _father_url = self.url_last_part(father_url)
         #extract links & add to todo
         try:
@@ -115,10 +123,11 @@ class Spider:
             links = webpage.xpath('//a/@href')
             for i in links:
                 if i[:4] == "http":
-                    _url = self.url_last_part(i)
-                    if _url == _father_url:
-                        log.debug(i)
-                        redis_manager.add_todo(i)
+                    if self.extension_check(i):
+                        _url = self.url_last_part(i)
+                        if _url == _father_url:
+                            log.debug(i)
+                            redis_manager.add_todo(i)
 
         except Exception as e:
             log.exception("error [+] when crawling for more urls")
@@ -135,6 +144,12 @@ class Spider:
 def todo_init(redis_manager: myRedis.Manage_Redis):
     redis_manager.read_from_conf()
     log.debug(redis_manager.status())
+    todo_urls = redis_manager.get_todo()
+    finish_urls = redis_manager.get_finish()
+    timeout_urls = redis_manager.get_timeout()
+    forbidden_urls = redis_manager.get_forbidden()
+    urls = todo_urls - finish_urls - timeout_urls - forbidden_urls
+    return urls
 
 
 def job_accquire(urls, l):
@@ -150,15 +165,17 @@ if __name__ == "__main__":
     log.warning("[+] crawling raw http contents, without rendering js")
     with mp.Manager() as manager:
         redis_manager = myRedis.Manage_Redis()
-        todo_init(redis_manager)
         spider = Spider()
+        urls = todo_init(redis_manager)
 
-        urls = redis_manager.get_todo()
+        log.debug(len(urls))
         urls = manager.list(urls)  # share memory
-
         l = mp.Lock()
-
-        for i in range(SPIDER_PROCESS_NUM):
-            p = mp.Process(target=spider.crawl, args=(urls, l))
-            p.start()
-        p.join()
+        while True:
+            for i in range(SPIDER_PROCESS_NUM):
+                try:
+                    p = mp.Process(target=spider.crawl, args=(urls, l))
+                    p.start()
+                except:
+                    continue
+            p.join()
