@@ -166,19 +166,16 @@ if __name__ == "__main__":
     with mp.Manager() as manager:
         redis_manager = myRedis.Manage_Redis()
         spider = Spider()
-        todo_init(redis_manager)
-        todo_urls = redis_manager.get_todo()
-        finish_urls = redis_manager.get_finish()
-        timeout_urls = redis_manager.get_timeout()
-        forbidden_urls = redis_manager.get_forbidden()
-        urls = todo_urls - finish_urls - timeout_urls - forbidden_urls
-        log.debug(len(urls))
+        urls = todo_init(redis_manager)
 
+        log.debug(len(urls))
         urls = manager.list(urls)  # share memory
         l = mp.Lock()
-
         while True:
             for i in range(SPIDER_PROCESS_NUM):
-                p = mp.Process(target=spider.crawl, args=(urls, l))
-                p.start()
+                try:
+                    p = mp.Process(target=spider.crawl, args=(urls, l))
+                    p.start()
+                except:
+                    continue
             p.join()
