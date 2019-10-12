@@ -94,8 +94,8 @@ class Spider:
                 redis_manager.add_timeout(url)
                 log.warning("success [+] add to timeout")
             except Exception as e:
-                log.exception("error [-] when add to timeout")
                 redis_manager.add_error(url)
+                log.exception("error [-] when add to timeout")
 
     def url_last_part(self, url):
         domain = parse.urlparse(url).netloc
@@ -166,16 +166,19 @@ if __name__ == "__main__":
     with mp.Manager() as manager:
         redis_manager = myRedis.Manage_Redis()
         spider = Spider()
-        urls = todo_init(redis_manager)
-
+        todo_init(redis_manager)
+        todo_urls = redis_manager.get_todo()
+        finish_urls = redis_manager.get_finish()
+        timeout_urls = redis_manager.get_timeout()
+        forbidden_urls = redis_manager.get_forbidden()
+        urls = todo_urls - finish_urls - timeout_urls - forbidden_urls
         log.debug(len(urls))
+
         urls = manager.list(urls)  # share memory
         l = mp.Lock()
+
         while True:
             for i in range(SPIDER_PROCESS_NUM):
-                try:
-                    p = mp.Process(target=spider.crawl, args=(urls, l))
-                    p.start()
-                except:
-                    continue
+                p = mp.Process(target=spider.crawl, args=(urls, l))
+                p.start()
             p.join()

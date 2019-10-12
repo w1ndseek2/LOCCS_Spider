@@ -30,35 +30,35 @@ class Manage_Redis:
         if urls:
             return urls
         else:
-            return(None)
+            return(set())
 
     def get_finish(self):
         urls = self.redis.smembers(self.tid + "_finish")
         if urls:
             return urls
         else:
-            return(None)
+            return(set())
 
     def get_timeout(self):
         urls = self.redis.smembers(self.tid + "_timeout")
         if urls:
             return urls
         else:
-            return(None)
+            return(set())
 
     def get_forbidden(self):
         urls = self.redis.smembers(self.tid + "_forbidden")
         if urls:
             return urls
         else:
-            return(None)
+            return(set())
 
     def get_login_form(self):
         urls = self.redis.smembers(self.tid + "_login_form")
         if urls:
             return urls
         else:
-            return(None)
+            return(set())
     
     def get_error(self):
         urls = self.redis.smembers(self.tid + "_error")
