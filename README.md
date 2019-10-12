@@ -17,18 +17,23 @@ myRedis.py Redis 增，删，状态读取
 
 `实际运行的时候只需要将spider.py里level="DEBUG"设置成level="NONE"即可`
 
-## Development
+>url status
 
-安装依赖 `pip3 install coloredlogs pyredis`  
-使用docker启动一个redis `sudo docker run --rm -d --name redis -v ./data:/data -p 6379:6379 redis --requirepass 'your_password'`
-
-url status
 - loccs_todo
 - loccs_finish 
   - loccs_login_form
 - loccs_timeout
 - loccs_forbidden
 - loccs_error
+
+## Development
+
+安装依赖 `pip3 install coloredlogs pyredis`  
+使用docker启动一个redis `sudo docker run --rm -d --name redis -v ./data:/data -p 6379:6379 redis --requirepass 'your_password'`
+
+OR
+
+使用bash脚本 `sudo bash start.sh`
 
 ## TODO
 
